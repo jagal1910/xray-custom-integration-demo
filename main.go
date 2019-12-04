@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
-const apiKey = "secretKey"
 const providerName = "custom-integration-demo"
 
 type CheckAuthResponse struct {
@@ -50,7 +50,18 @@ type ComponentInfoResponse struct {
 	Components []ComponentInfo
 }
 
+var dbPath = "db.json"
+var apiKey string
+
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("\nApi key is required\nUsage: go run main.go (api-key)")
+		return
+	}
+	apiKey = os.Args[1]
+	if len(os.Args) > 2 {
+		dbPath = os.Args[2]
+	}
 	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
 	http.HandleFunc("/api/checkauth", checkAuth) // TestURL
 	http.HandleFunc("/api/componentinfo", componentInfo) // URL
@@ -94,13 +105,19 @@ func componentInfo(w http.ResponseWriter, r *http.Request) {
 
 	// Get all the components from the "db".
 	// The db is just a json file with fake data about components.
-	db := getDB()
+	db, err := getDB()
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Get matching components from db
 	responsePayload := findComponents(requestPayload.Components, db)
 
 	js, err := json.Marshal(responsePayload)
 	if err != nil {
+		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -108,12 +125,15 @@ func componentInfo(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-// Read json file "database" into memory
-func getDB() []ComponentInfo {
-	file, _ := ioutil.ReadFile("db.json")
+// Unmarshall data from the json db
+func getDB() ([]ComponentInfo, error) {
+	file, err := ioutil.ReadFile(dbPath)
+	if err != nil {
+		return nil, err
+	}
 	var data []ComponentInfo
 	_ = json.Unmarshal(file, &data)
-	return data
+	return data, nil
 }
 
 // Search db for matching components and return
