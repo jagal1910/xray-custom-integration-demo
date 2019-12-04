@@ -53,27 +53,38 @@ type ComponentInfoResponse struct {
 	Components []ComponentInfo
 }
 
-var dbPath = "db.json"
 var apiKey string
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("\nApi key is required\nUsage: go run main.go (api-key)")
+	dbPath, err := parseArgs()
+	if err != nil {
+		fmt.Println(err.Error())
 		return
 	}
-	apiKey = os.Args[1]
-	if len(os.Args) > 2 {
-		dbPath = os.Args[2]
-	}
 	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
-	http.HandleFunc("/api/checkauth", checkAuth)         // TestURL
-	http.HandleFunc("/api/componentinfo", componentInfo) // URL
+	http.HandleFunc("/api/checkauth", checkAuth) // TestURL
+	http.HandleFunc("/api/componentinfo", func(w http.ResponseWriter, r *http.Request) {
+		componentInfo(w, r, dbPath)
+	}) // URL
 
-	err := http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("Something went wrong: ", err)
 		return
 	}
+}
+
+func parseArgs() (string, error) {
+	if len(os.Args) < 2 {
+		fmt.Println()
+		return "", fmt.Errorf("\nApi key is required\nUsage: go run main.go (api-key)")
+	}
+	dbPath := "db.json"
+	apiKey = os.Args[1]
+	if len(os.Args) > 2 {
+		dbPath = os.Args[2]
+	}
+	return dbPath, nil
 }
 
 // The Test URL you can use to test your API key with the provider using the "Test" button
@@ -94,7 +105,7 @@ func checkAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 // This endpoint provides information to XRay about components
-func componentInfo(w http.ResponseWriter, r *http.Request) {
+func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -108,7 +119,7 @@ func componentInfo(w http.ResponseWriter, r *http.Request) {
 
 	// Get all the components from the "db".
 	// The db is just a json file with fake data about components.
-	db, err := getDB()
+	db, err := getDB(dbPath)
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -132,7 +143,7 @@ func componentInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 // Unmarshall data from the json db
-func getDB() ([]ComponentInfo, error) {
+func getDB(dbPath string) ([]ComponentInfo, error) {
 	file, err := ioutil.ReadFile(dbPath)
 	if err != nil {
 		return nil, err
