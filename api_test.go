@@ -21,31 +21,6 @@ func TestApi(t *testing.T) {
 	t.Run("Invalid Api Key", func(t *testing.T) {
 		invalidAPIKeyTest(t, ts)
 	})
-
-	//err = json.Unmarshal(body, &rr)
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
-	//t.Error(rr)
-
-	//tests := []struct {
-	//	name string
-	//	r    *http.Request
-	//}{
-	//	{name: "1: testing get", r: newreq("GET", ts.URL+"/checkauth", nil)},
-	//}
-	//for _, test := range tests {
-	//	t.Run(test.name, func(t *testing.T) {
-	//		resp, err := http.DefaultClient.Do(tt.r)
-	//
-	//		defer resp.Body.Close()
-	//
-	//		if err != nil {
-	//			t.Fatal(err)
-	//		}
-	//		// check for expected response here.
-	//	})
-	//}
 }
 
 func validAPIKeyTest(t *testing.T, ts *httptest.Server) {
