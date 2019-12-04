@@ -11,6 +11,7 @@ import (
 )
 
 const providerName = "custom-integration-demo"
+const InvalidAPIKeyMessage = "Invalid Api Key"
 
 type CheckAuthResponse struct {
 	Valid bool
@@ -97,7 +98,7 @@ func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 	resp := CheckAuthResponse{true, ""}
 	key := r.Header.Get("apiKey")
 	if key != apiKey {
-		resp = CheckAuthResponse{Valid: false, Error: "Invalid Api Key"}
+		resp = CheckAuthResponse{Valid: false, Error: InvalidAPIKeyMessage}
 	}
 	js, err := json.Marshal(resp)
 	if err != nil {
