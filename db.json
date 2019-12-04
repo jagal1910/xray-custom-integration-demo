@@ -9,7 +9,7 @@
         "cve": "CVE-0000-0000",
         "version": "^2.2.0",
         "type": "security",
-        "source_id": "9",
+        "source_id": "11",
         "summary": "A fake vulnerability with python requests",
         "description": "A description of the fake vulnerability",
         "cvss_v2": "7.9",

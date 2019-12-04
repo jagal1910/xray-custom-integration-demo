@@ -53,42 +53,47 @@ type ComponentInfoResponse struct {
 	Components []ComponentInfo
 }
 
-var apiKey string
-
 func main() {
-	dbPath, err := parseArgs()
+	dbPath, apiKey, err := parseArgs()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Something went wrong: ", err)
 		return
 	}
-	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
-	http.HandleFunc("/api/checkauth", checkAuth) // TestURL
-	http.HandleFunc("/api/componentinfo", func(w http.ResponseWriter, r *http.Request) {
-		componentInfo(w, r, dbPath)
-	}) // URL
-
-	err = http.ListenAndServe(":8080", nil)
+	router := CreateRouter(dbPath, apiKey)
+	err = http.ListenAndServe(":8080", router)
 	if err != nil {
 		fmt.Println("Something went wrong: ", err)
 		return
 	}
 }
 
-func parseArgs() (string, error) {
+func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
+	router := http.NewServeMux()
+	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
+	router.HandleFunc("/api/checkauth", func(w http.ResponseWriter, r *http.Request) {
+		checkAuth(w, r, apiKey)
+	}) // TestURL
+	router.HandleFunc("/api/componentinfo", func(w http.ResponseWriter, r *http.Request) {
+		componentInfo(w, r, dbPath)
+	}) // URL
+	return router
+}
+
+func parseArgs() (string, string, error) {
 	if len(os.Args) < 2 {
 		fmt.Println()
-		return "", fmt.Errorf("\nApi key is required\nUsage: go run main.go (api-key)")
+		return "", "", fmt.Errorf("\nApi key is required\nUsage: go run main.go (api-key)")
 	}
+	apiKey := os.Args[1]
 	dbPath := "db.json"
-	apiKey = os.Args[1]
 	if len(os.Args) > 2 {
 		dbPath = os.Args[2]
 	}
-	return dbPath, nil
+	return dbPath, apiKey, nil
 }
 
 // The Test URL you can use to test your API key with the provider using the "Test" button
-func checkAuth(w http.ResponseWriter, r *http.Request) {
+func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 	resp := CheckAuthResponse{true, ""}
 	key := r.Header.Get("apiKey")
 	if key != apiKey {
