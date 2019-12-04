@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Masterminds/semver"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 const providerName = "custom-integration-demo"
@@ -28,6 +30,7 @@ type ComponentInfoRequest struct {
 
 type Vulnerability struct {
 	CVE         string
+	Version     string
 	Type        string
 	SourceID    string `json:"source_id"`
 	Summary     string
@@ -63,7 +66,7 @@ func main() {
 		dbPath = os.Args[2]
 	}
 	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
-	http.HandleFunc("/api/checkauth", checkAuth) // TestURL
+	http.HandleFunc("/api/checkauth", checkAuth)         // TestURL
 	http.HandleFunc("/api/componentinfo", componentInfo) // URL
 
 	err := http.ListenAndServe(":8080", nil)
@@ -113,8 +116,11 @@ func componentInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get matching components from db
-	responsePayload := findComponents(requestPayload.Components, db)
-
+	responsePayload, err := findComponents(requestPayload.Components, db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	js, err := json.Marshal(responsePayload)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -137,19 +143,51 @@ func getDB() ([]ComponentInfo, error) {
 }
 
 // Search db for matching components and return
-func findComponents(components []Component, db []ComponentInfo) ComponentInfoResponse {
+func findComponents(components []Component, db []ComponentInfo) (ComponentInfoResponse, error) {
 	matches := ComponentInfoResponse{}
 	// Check database for matching components
 	for _, component := range components {
 		result := ComponentInfo{}
+		name, version := getVersionAndNameFromComponentID(component.ComponentID)
 		for _, item := range db {
-			if item.ComponentID == component.ComponentID {
-				result = item
-				result.Provider = providerName
-				break
+			if item.ComponentID == name {
+				for _, vuln := range item.Vulnerabilities {
+					isMatching, err := isVersionMatching(version, vuln.Version)
+					if err != nil {
+						return matches, err
+					}
+					if isMatching {
+						result = item
+						result.Provider = providerName
+						// Restore the full component id to include the version so XRay can identify it.
+						result.ComponentID = component.ComponentID
+						break
+					}
+				}
 			}
 		}
 		matches.Components = append(matches.Components, result)
 	}
-	return matches
+	return matches, nil
+}
+
+// Extract the version from the last ":" in the component ID
+func getVersionAndNameFromComponentID(componentID string) (string, string) {
+	index := strings.LastIndex(componentID, ":")
+	split := strings.SplitAfterN(componentID, ":", index)
+	return componentID[0:index], split[len(split)-1]
+}
+
+func isVersionMatching(componentVersion string, versionRange string) (bool, error) {
+	constraint, err := semver.NewConstraint(versionRange)
+	if err != nil {
+		fmt.Println(err)
+		return false, err
+	}
+	candidate, err := semver.NewVersion(componentVersion)
+	if err != nil {
+		fmt.Println(err)
+		return false, err
+	}
+	return constraint.Check(candidate), nil
 }

@@ -1,14 +1,15 @@
 [
   {
-    "component_id": "pypi://requests:2.22.0",
+    "component_id": "pypi://requests",
     "licenses": [
       "Apache 2.0"
     ],
     "vulnerabilities": [
       {
         "cve": "CVE-0000-0000",
+        "version": "^2.2.0",
         "type": "security",
-        "source_id": "0",
+        "source_id": "7",
         "summary": "A fake vulnerability with python requests",
         "description": "A description of the fake vulnerability",
         "cvss_v2": "7.9",
@@ -21,13 +22,14 @@
     ]
   },
   {
-    "component_id": "docker://hello-world:latest",
+    "component_id": "docker://hello-world",
     "licenses": [
       "Apache 2.0"
     ],
     "vulnerabilities": [
       {
         "cve": "CVE-0000-0001",
+        "version": "<= 2.x",
         "type": "security",
         "source_id": "2",
         "summary": "A fake vulnerability with docker hello-world",
