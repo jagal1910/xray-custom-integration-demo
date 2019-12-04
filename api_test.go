@@ -34,6 +34,9 @@ func TestApi(t *testing.T) {
 	t.Run("Component with vulnerabilities", func(t *testing.T) {
 		vulnerableComponentTest(t, ts)
 	})
+	t.Run("Component without vulnerabilities", func(t *testing.T) {
+		healthyComponentTest(t, ts)
+	})
 	//t.Run("Component with vulnerabilities", func (t))
 
 }
@@ -128,7 +131,7 @@ func vulnerableComponentTest(t *testing.T, ts *httptest.Server) {
 		Components: []Component{{
 			ComponentID: "pypi://requests:2.22.0",
 		}},
-		Context: "A contest",
+		Context: "foo",
 	}
 	data, err := json.Marshal(component)
 	if err != nil {
@@ -159,5 +162,44 @@ func vulnerableComponentTest(t *testing.T, ts *httptest.Server) {
 	}
 	if len(componentInfo.Components[0].Vulnerabilities) < 1 {
 		t.Error("Expected component with id: ", component.Components[0].ComponentID, " to have a vulnerability, but it has none.")
+	}
+}
+
+func healthyComponentTest(t *testing.T, ts *httptest.Server) {
+	component := ComponentInfoRequest{
+		Components: []Component{{
+			ComponentID: "healthy://component:1.0.0",
+		}},
+		Context: "foo",
+	}
+	data, err := json.Marshal(component)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest("GET", ts.URL+"/api/componentinfo", bytes.NewBuffer(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("apiKey", apiKey)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	componentInfo := ComponentInfoResponse{}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = json.Unmarshal(body, &componentInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(componentInfo.Components) < 1 {
+		t.Error("Unable to find component with id: ", component.Components[0].ComponentID, " in db file.")
+	}
+	if len(componentInfo.Components[0].Vulnerabilities) != 0 {
+		t.Error("Expected component with id: ", component.Components[0].ComponentID, " to have no vulnerabilities, but one or more were found.")
 	}
 }

@@ -42,5 +42,12 @@
         ]
       }
     ]
+  },
+  {
+    "component_id": "healthy://component",
+    "licenses": [
+      "Apache 2.0"
+    ],
+    "vulnerabilities": []
   }
 ]
