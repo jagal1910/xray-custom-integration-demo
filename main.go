@@ -178,6 +178,7 @@ func getVersionAndNameFromComponentID(componentID string) (string, string) {
 	return componentID[0:index], split[len(split)-1]
 }
 
+// Only semver is supported
 func isVersionMatching(componentVersion string, versionRange string) (bool, error) {
 	constraint, err := semver.NewConstraint(versionRange)
 	if err != nil {
