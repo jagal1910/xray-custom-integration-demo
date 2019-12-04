@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -22,6 +23,7 @@ func TestApi(t *testing.T) {
 	t.Run("CheckAuth: Invalid Api Key", func(t *testing.T) {
 		invalidAPIKeyTest(t, ts)
 	})
+
 	// ComponentInfo endpoint
 	t.Run("ComponentInfo: Valid Api Key", func(t *testing.T) {
 		validAPIKeyTestComponentInfo(t, ts)
@@ -29,6 +31,10 @@ func TestApi(t *testing.T) {
 	t.Run("ComponentInfo: Invalid Api Key", func(t *testing.T) {
 		invalidAPIKeyTestComponentInfo(t, ts)
 	})
+	t.Run("Component with vulnerabilities", func(t *testing.T) {
+		vulnerableComponentTest(t, ts)
+	})
+	//t.Run("Component with vulnerabilities", func (t))
 
 }
 
@@ -45,6 +51,9 @@ func validAPIKeyTest(t *testing.T, ts *httptest.Server) {
 	defer resp.Body.Close()
 	data := CheckAuthResponse{}
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		t.Fatal(err)
@@ -68,6 +77,9 @@ func invalidAPIKeyTest(t *testing.T, ts *httptest.Server) {
 	defer resp.Body.Close()
 	data := CheckAuthResponse{}
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		t.Fatal(err)
@@ -90,7 +102,6 @@ func validAPIKeyTestComponentInfo(t *testing.T, ts *httptest.Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		t.Error("Failed to validate api key: ", apiKey)
 	}
@@ -107,8 +118,46 @@ func invalidAPIKeyTestComponentInfo(t *testing.T, ts *httptest.Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		t.Error("Invalid API key was accepted: ", invalidKey)
+	}
+}
+
+func vulnerableComponentTest(t *testing.T, ts *httptest.Server) {
+	component := ComponentInfoRequest{
+		Components: []Component{{
+			ComponentID: "pypi://requests:2.22.0",
+		}},
+		Context: "A contest",
+	}
+	data, err := json.Marshal(component)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest("GET", ts.URL+"/api/componentinfo", bytes.NewBuffer(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("apiKey", apiKey)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	componentInfo := ComponentInfoResponse{}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = json.Unmarshal(body, &componentInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(componentInfo.Components) < 1 {
+		t.Error("Unable to find component with id: ", component.Components[0].ComponentID, " in db file.")
+	}
+	if len(componentInfo.Components[0].Vulnerabilities) < 1 {
+		t.Error("Expected component with id: ", component.Components[0].ComponentID, " to have a vulnerability, but it has none.")
 	}
 }
