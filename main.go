@@ -68,6 +68,7 @@ func main() {
 	}
 }
 
+// Only one api key is supported here, passed in as a CLI argument
 func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
 	router := http.NewServeMux()
 	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
@@ -75,7 +76,7 @@ func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
 		checkAuth(w, r, apiKey)
 	}) // TestURL
 	router.HandleFunc("/api/componentinfo", func(w http.ResponseWriter, r *http.Request) {
-		componentInfo(w, r, dbPath)
+		componentInfo(w, r, dbPath, apiKey)
 	}) // URL
 	return router
 }
@@ -110,8 +111,13 @@ func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 	w.Write(js)
 }
 
+
 // This endpoint provides information to XRay about components
-func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string) {
+func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey string) {
+	key := r.Header.Get("apiKey")
+	if key != apiKey {
+		http.Error(w, InvalidAPIKeyMessage, http.StatusUnauthorized)
+	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
