@@ -15,6 +15,7 @@ import (
 
 const providerName = "custom-integration-demo"
 const InvalidAPIKeyMessage = "Invalid Api Key"
+const port = ":8080"
 
 type CheckAuthResponse struct {
 	Valid bool
@@ -75,9 +76,9 @@ func main() {
 		log.Fatalf("Something went wrong: %v\n", err)
 	}
 	router := CreateRouter(dbPath, apiKey)
-	log.Print("Server is starting...\n")
+	log.Print("Server is starting on port ", port, "\n")
 	s := &http.Server{
-		Addr:           ":8080",
+		Addr:           port,
 		Handler:        handlers.LoggingHandler(log.Writer(), router),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
