@@ -7,6 +7,12 @@
         "licenses": [
           "Apache 2.0"
         ]
+      },
+      {
+        "version": ">=3.0.0",
+        "licenses": [
+          "Different License"
+        ]
       }
     ],
     "vulnerabilities": [
@@ -64,5 +70,32 @@
       }
     ],
     "vulnerabilities": []
+  },
+  {
+    "component_id": "vulnerable://component",
+    "licenses": [
+      {
+        "version": "1.0.0",
+        "licenses": [
+          "Apache 2.0"
+        ]
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "cve": "CVE-0000-0000",
+        "version": "1.0.0",
+        "type": "security",
+        "source_id": "12",
+        "summary": "A fake vulnerability with python requests",
+        "description": "A description of the fake vulnerability",
+        "cvss_v2": "7.9",
+        "url": "http://more.info",
+        "publish_date": "2019-11-03T07:30:51.991+00:00",
+        "references": [
+          "http://archives.neohapsis.com/archives/bugtraq/2012-05/0130.html"
+        ]
+      }
+    ]
   }
 ]
