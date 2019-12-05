@@ -69,13 +69,13 @@ type ComponentInfoResponse struct {
 func main() {
 	dbPath, apiKey, err := parseArgs()
 	if err != nil {
-		fmt.Println("Something went wrong: ", err)
+		fmt.Println("\nSomething went wrong: ", err)
 		return
 	}
 	router := CreateRouter(dbPath, apiKey)
 	err = http.ListenAndServe(":8080", router)
 	if err != nil {
-		fmt.Println("Something went wrong: ", err)
+		fmt.Println("\nSomething went wrong: ", err)
 		return
 	}
 }
@@ -95,7 +95,7 @@ func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
 
 func parseArgs() (string, string, error) {
 	if len(os.Args) < 2 {
-		return "", "", fmt.Errorf("\nApi key is required\nUsage: go run main.go (api-key)")
+		return "", "", fmt.Errorf("Api key is required\nUsage: go run main.go (api-key) [path-to-db-file]")
 	}
 	apiKey := os.Args[1]
 	dbPath := "db.json"
