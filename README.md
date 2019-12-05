@@ -63,14 +63,6 @@ Configure the integration.
 
 Test the connection and api key by clicking the "Test" button. You should get a message saying "API key is valid" in the XRay UI.
 
-
-
-On the XRay homepage, sync XRay's database. This will allow XRay to pick up any Artifactory repositories configured to have XRay enabled.
-
-![sync-db](./images/sync-db-bust.png)
-
-When the sync is done, the component count should increase if XRay finds any new components. The new component should also be visible in the right-hand panel.
-
 ### Generating a Security Vulnerability
 
 On the details page of the component you want to test, copy the **component id**.
@@ -116,6 +108,7 @@ In the `component_id` field, **do not include the version**. Semver ranges are s
 
 For a component with and id of `pypi://requests:2.22.0`, the entry might look like this:
 
+Note that this example uses a semver range for its licence version
 ```
   {
     "component_id": "pypi://requests",
