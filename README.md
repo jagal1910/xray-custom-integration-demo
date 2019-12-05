@@ -41,7 +41,7 @@ Click the + icon to add an integration.
 
 Select custom integration.
 
-<img src="./images/integration-type.png" alt="integration-type.png" style="zoom:30%;" />
+<img src="/images/integration-type.png" alt="integration-type.png" style="zoom:30%;" />
 
 Configure the integration.
 
