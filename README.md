@@ -67,7 +67,7 @@ Test the connection and api key by clicking the "Test" button. You should get a 
 
 On the XRay homepage, sync XRay's database. This will allow XRay to pick up any Artifactory repositories configured to have XRay enabled.
 
-![sync-db](./images/sync-db.png)
+![sync-db](./images/sync-db-bust.png)
 
 When the sync is done, the component count should increase if XRay finds any new components. The new component should also be visible in the right-hand panel.
 
