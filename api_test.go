@@ -38,9 +38,6 @@ func TestApi(t *testing.T) {
 	t.Run("Component without vulnerabilities", func(t *testing.T) {
 		healthyComponentTest(t, ts)
 	})
-	t.Run("Component without vulnerabilities", func(t *testing.T) {
-		healthyComponentTest(t, ts)
-	})
 	t.Run("Component not in database", func(t *testing.T) {
 		notFoundComponentTest(t, ts)
 	})
