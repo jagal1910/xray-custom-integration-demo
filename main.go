@@ -129,7 +129,6 @@ func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey
 		http.Error(w, InvalidAPIKeyMessage, http.StatusUnauthorized)
 		return
 	}
-	fmt.Println("we got past here")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
