@@ -11,7 +11,7 @@ XRay can integrate with external services that provide information about vulnera
 
 Update the settings for a repository in Artifactory to be viewable by XRay.
 
-<img src="./images/rt-xray-integration-checkbox.png" alt="rt-xray-integration-checkbox" style="zoom:25%;" />
+![rt-xray-integration-checkbox.png](./images/rt-xray-integration-checkbox.png)
 
 #### Running the included demo server
 
@@ -27,21 +27,21 @@ The server runs on port 8080, so that's the port to expose.
 
 Once ngrok is running, take note of the forwarding urls. These will be provided to XRay when configuring the integration.
 
-<img src="./images/ngrok-output.png" alt="xray-integrations-menu-item.png" style="zoom:50%;" />
+![ngrok](./images/ngrok-output.png)
 
 #### XRay Setup
 
 Open the integrations view from the admin panel in the sidebar.
 
-<img src="./images/xray-integrations-menu-item.png" alt="xray-integrations-menu-item.png" style="zoom:30%;" />
+![xray-integrations-menu-item](./images/xray-integrations-menu-item.png)
 
 Click the + icon to add an integration.
 
-<img src="./images/add-integration-button.png" alt="xray-integrations-menu-item.png" style="zoom:30%;" />
+![./images/add-integration-button](./images/add-integration-button.png)
 
 Select custom integration.
 
-<img src="/images/integration-type.png" alt="integration-type.png" style="zoom:30%;" />
+![integration-type](./images/integration-type.png)
 
 Configure the integration.
 
@@ -51,7 +51,7 @@ Configure the integration.
 
 -  Use `custom-integration-demo` as the Vendor.
 
-  <img src="./images/integration-config.png" alt="integration-config.png" style="zoom:30%;" />
+  ![integration-config](./images/integration-config.png)
 
 Test the connection and api key by clicking the "Test" button. You should get a message saying "API key is valid" in the XRay UI.
 
