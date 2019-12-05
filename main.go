@@ -42,6 +42,18 @@ type Vulnerability struct {
 	References  []string
 }
 
+type License struct {
+	Version  string
+	Licenses []string
+}
+
+// The shape of a component in the db
+type ComponentRecord struct {
+	ComponentID     string `json:"component_id"`
+	Licenses        []License
+	Vulnerabilities []Vulnerability
+}
+
 type ComponentInfo struct {
 	ComponentID     string `json:"component_id"`
 	Licenses        []string
@@ -111,7 +123,6 @@ func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 	w.Write(js)
 }
 
-
 // This endpoint provides information to XRay about components
 func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey string) {
 	key := r.Header.Get("apiKey")
@@ -155,18 +166,18 @@ func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey
 }
 
 // Unmarshall data from the json db
-func getDB(dbPath string) ([]ComponentInfo, error) {
+func getDB(dbPath string) ([]ComponentRecord, error) {
 	file, err := ioutil.ReadFile(dbPath)
 	if err != nil {
 		return nil, err
 	}
-	var data []ComponentInfo
+	var data []ComponentRecord
 	_ = json.Unmarshal(file, &data)
 	return data, nil
 }
 
 // Search db for matching components and return
-func findComponents(components []Component, db []ComponentInfo) (ComponentInfoResponse, error) {
+func findComponents(components []Component, db []ComponentRecord) (ComponentInfoResponse, error) {
 	matches := ComponentInfoResponse{}
 	// Check database for matching components
 	for _, component := range components {
@@ -174,22 +185,28 @@ func findComponents(components []Component, db []ComponentInfo) (ComponentInfoRe
 		name, version := getVersionAndNameFromComponentID(component.ComponentID)
 		for _, item := range db {
 			if item.ComponentID == name {
-				for _, vuln := range item.Vulnerabilities {
-					isMatching, err := isVersionMatching(version, vuln.Version)
-					if err != nil {
-						return matches, err
+				// Any Matching Licenses?
+				licenses, err := getLicensesForVersion(version, item.Licenses)
+				if err != nil {
+					return matches, err
+				}
+				// Any Matching Vulnerabilities?
+				vulnerabilities, err := getVulnerabilitiesForVersion(version, item.Vulnerabilities)
+				if err != nil {
+					return matches, err
+				}
+				if len(licenses) > 0 || len(vulnerabilities) > 0 {
+					result = ComponentInfo{
+						ComponentID:     component.ComponentID,
+						Licenses:        licenses,
+						Provider:        providerName,
+						Vulnerabilities: vulnerabilities,
 					}
-					if isMatching {
-						result = item
-						result.Provider = providerName
-						// Restore the full component id to include the version so XRay can identify it.
-						result.ComponentID = component.ComponentID
-						break
-					}
+					matches.Components = append(matches.Components, result)
+					break
 				}
 			}
 		}
-		matches.Components = append(matches.Components, result)
 	}
 	return matches, nil
 }
@@ -197,8 +214,42 @@ func findComponents(components []Component, db []ComponentInfo) (ComponentInfoRe
 // Extract the version from the last ":" in the component ID
 func getVersionAndNameFromComponentID(componentID string) (string, string) {
 	index := strings.LastIndex(componentID, ":")
-	split := strings.SplitAfterN(componentID, ":", index)
-	return componentID[0:index], split[len(split)-1]
+	name := ""
+	version := ""
+	if index > -1 {
+		split := strings.SplitAfterN(componentID, ":", index)
+		name = componentID[0:index]
+		version = split[len(split)-1]
+	}
+	return name, version
+}
+
+func getLicensesForVersion(version string, licenses []License) ([]string, error) {
+	var matchingLicences []string
+	for _, license := range licenses {
+		isMatching, err := isVersionMatching(version, license.Version)
+		if err != nil {
+			return matchingLicences, err
+		}
+		if isMatching {
+			matchingLicences = append(matchingLicences, license.Licenses...)
+		}
+	}
+	return matchingLicences, nil
+}
+
+func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerability) ([]Vulnerability, error) {
+	var matchingVulnerabilities []Vulnerability
+	for _, vulnerability := range vulnerabilities {
+		isMatching, err := isVersionMatching(version, vulnerability.Version)
+		if err != nil {
+			return matchingVulnerabilities, err
+		}
+		if isMatching {
+			matchingVulnerabilities = append(matchingVulnerabilities, vulnerability)
+		}
+	}
+	return matchingVulnerabilities, nil
 }
 
 // Only semver is supported
