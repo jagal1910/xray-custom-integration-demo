@@ -47,7 +47,7 @@ type License struct {
 	Licenses []string
 }
 
-// The shape of a component in the db
+// The shape of a component in the db used by this demo
 type ComponentRecord struct {
 	ComponentID     string `json:"component_id"`
 	Licenses        []License
@@ -95,7 +95,6 @@ func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
 
 func parseArgs() (string, string, error) {
 	if len(os.Args) < 2 {
-		fmt.Println()
 		return "", "", fmt.Errorf("\nApi key is required\nUsage: go run main.go (api-key)")
 	}
 	apiKey := os.Args[1]

@@ -12,8 +12,8 @@ XRay can integrate with external services that provide information about vulnera
 - Creating an service that responds to XRay with information about vulnerabilities.
 
 - Integrating the service with XRay.
-- Testing the integration on a packge with vulnerabilities.
-- Testing the integration on a packge without vulnerabilities.
+- Testing the integration on a package with vulnerabilities.
+- Testing the integration on a package without vulnerabilities.
 
 ### Prerequisites
 
