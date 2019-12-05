@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Masterminds/semver"
+	"github.com/gorilla/handlers"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 const providerName = "custom-integration-demo"
@@ -69,15 +72,18 @@ type ComponentInfoResponse struct {
 func main() {
 	dbPath, apiKey, err := parseArgs()
 	if err != nil {
-		fmt.Println("\nSomething went wrong: ", err)
-		return
+		log.Fatalf("Something went wrong: %v\n", err)
 	}
 	router := CreateRouter(dbPath, apiKey)
-	err = http.ListenAndServe(":8080", router)
-	if err != nil {
-		fmt.Println("\nSomething went wrong: ", err)
-		return
+	log.Print("Server is starting...\n")
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        handlers.LoggingHandler(log.Writer(), router),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
+	log.Fatal(s.ListenAndServe())
 }
 
 // Only one api key is supported here, passed in as a CLI argument
@@ -256,12 +262,12 @@ func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerabilit
 func isVersionMatching(componentVersion string, versionRange string) (bool, error) {
 	constraint, err := semver.NewConstraint(versionRange)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false, err
 	}
 	candidate, err := semver.NewVersion(componentVersion)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return false, err
 	}
 	return constraint.Check(candidate), nil
