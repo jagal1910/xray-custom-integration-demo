@@ -1,11 +1,19 @@
 XRay Custom Integration Demo
 =====
 
-### What is a custom integration?
+## What is a custom integration?
 
 XRay can integrate with external services that provide information about vulnerabilities in packages. If a user wants to implement their own such service they can use a custom integration.
 
 
+
+## Creating a custom Integration
+
+There are three pieces to set up:
+
+- Artifactory
+- Your custom integration server
+- XRay
 
 ### Artifactory Setup
 
@@ -21,7 +29,7 @@ If a path to db file is not specified, [db.json](./db.json) will be used. Take n
 
 ### Using ngrok to expose your server to the internet
 
-The server runs on port 8080, so that's the port to expose.
+The demo server runs on port 8080, so that's the port to expose.
 
 `ngrok http 8080`
 
@@ -54,6 +62,14 @@ Configure the integration.
   ![integration-config](./images/integration-config.png)
 
 Test the connection and api key by clicking the "Test" button. You should get a message saying "API key is valid" in the XRay UI.
+
+
+
+On the XRay homepage, sync XRay's database. This will allow XRay to pick up any Artifactory repositories configured to have XRay enabled.
+
+![sync-db](./images/sync-db.png)
+
+When the sync is done, the component count should increase if XRay finds any new components. The new component should also be visible in the righthand panel.
 
 ### Running Tests
 
