@@ -127,23 +127,26 @@ func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey
 	key := r.Header.Get("apiKey")
 	if key != apiKey {
 		http.Error(w, InvalidAPIKeyMessage, http.StatusUnauthorized)
+		return
 	}
+	fmt.Println("we got past here")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	requestPayload := ComponentInfoRequest{}
 	err = json.Unmarshal(body, &requestPayload)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	// Get all the components from the "db".
 	// The db is just a json file with fake data about components.
 	db, err := getDB(dbPath)
 	if err != nil {
-		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -156,7 +159,6 @@ func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey
 	}
 	js, err := json.Marshal(responsePayload)
 	if err != nil {
-		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
