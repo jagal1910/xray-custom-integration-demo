@@ -84,7 +84,7 @@ Configure the integration.
 
 ![integration-config](./images/integration-config.png)
 
-Test the connection and api key by clicking the "Test" button. You should get a message saying "API key is valid" in the XRay UI.
+Test the connection and api key by clicking the **"Test"** button pictured above. You should get a message saying "API key is valid" in the XRay UI. If you don't get this message your integration is not working.
 
 ### Generating a Security Vulnerability
 
