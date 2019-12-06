@@ -65,18 +65,23 @@ type ComponentInfo struct {
 	Vulnerabilities []Vulnerability
 }
 
+// The shape of the response returned by component info endpoint
 // XRay uses this info to check for violations
 type ComponentInfoResponse struct {
 	Components []ComponentInfo
 }
 
 func main() {
+	// The api key must be provided to XRay when configuring the integration
+	// Only one api key is supported here, passed in as a CLI argument
 	dbPath, apiKey, err := parseArgs()
 	if err != nil {
 		log.Fatalf("Something went wrong: %v\n", err)
 	}
+	// Create the routes required for any XRay integration.
 	router := CreateRouter(dbPath, apiKey)
 	log.Print("Server is starting on port ", port, "\n")
+	// Instantiate the server with the router.
 	s := &http.Server{
 		Addr:           port,
 		Handler:        handlers.LoggingHandler(log.Writer(), router),
@@ -84,10 +89,11 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+	// Run the server
 	log.Fatal(s.ListenAndServe())
 }
 
-// Only one api key is supported here, passed in as a CLI argument
+// Creates the routes required for any XRay integration.
 func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
 	router := http.NewServeMux()
 	// Routes: must be supplied to x-ray during integration setup as TestURL and URL
@@ -100,6 +106,7 @@ func CreateRouter(dbPath string, apiKey string) *http.ServeMux {
 	return router
 }
 
+// Reads and validates command line arguments
 func parseArgs() (string, string, error) {
 	if len(os.Args) < 2 {
 		return "", "", fmt.Errorf("Api key is required\nUsage: go run main.go (api-key) [path-to-db-file]")
@@ -114,9 +121,13 @@ func parseArgs() (string, string, error) {
 
 // The Test URL you can use to test your API key with the provider using the "Test" button
 func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
+	// Our client (XRay) expects a response with json for both correct and incorrect api keys.
 	resp := CheckAuthResponse{true, ""}
 	key := r.Header.Get("apiKey")
 	if key != apiKey {
+		// If the key in the integration doesn't match the one we passed in through
+		// the command line, change the json response to the expected FAILURE response.
+		// XRay uses the json body of the response to check whether the key is valid, NOT status code.
 		resp = CheckAuthResponse{Valid: false, Error: InvalidAPIKeyMessage}
 	}
 	js, err := json.Marshal(resp)
@@ -126,14 +137,22 @@ func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	// Write a 200 response, even when the client is not authorized.
 	w.Write(js)
 }
 
-// This endpoint provides information to XRay about components
+/**
+This endpoint provides information to XRay about components
+
+It implements the primary feature of this integration: reporting
+information about vulnerabilities and licenses in software components
+*/
 func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey string) {
+	// We need to check for authorization here, too.
 	key := r.Header.Get("apiKey")
-	fmt.Println(apiKey, key)
 	if key != apiKey {
+		// Unlike the "/checkauth" endpoint, "/componentinfo" can use a traditional 403
+		// response when the client is not authorized.
 		http.Error(w, InvalidAPIKeyMessage, http.StatusUnauthorized)
 		return
 	}
@@ -159,6 +178,8 @@ func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey
 	}
 
 	// Get matching components from db
+	// If any of the components in the client's request match vulnerabilities
+	// or licenses stored in the database, we will respond with data about those components.
 	responsePayload, err := findComponents(requestPayload.Components, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -194,6 +215,8 @@ func findComponents(components []Component, db []ComponentRecord) (ComponentInfo
 		for _, item := range db {
 			if item.ComponentID == name {
 				// Any Matching Licenses?
+				// Even if there are no vulnerabilities for the component,
+				// we want to inform XRay about any licenses associated with this version.
 				licenses, err := getLicensesForVersion(version, item.Licenses)
 				if err != nil {
 					return matches, err
@@ -203,14 +226,22 @@ func findComponents(components []Component, db []ComponentRecord) (ComponentInfo
 				if err != nil {
 					return matches, err
 				}
+				//
 				if len(licenses) > 0 || len(vulnerabilities) > 0 {
 					result = ComponentInfo{
+						// Use the component_id provided by the client, NOT the one from our database.
+						// The db's notion of a component_id does not include the component's version.
+						// XRay needs us to include the version in this field.
 						ComponentID:     component.ComponentID,
 						Licenses:        licenses,
+						// Hardcode the provider name
+						// We want this to match the one configured in the XRay integration
 						Provider:        providerName,
 						Vulnerabilities: vulnerabilities,
 					}
 					matches.Components = append(matches.Components, result)
+					// There should be only one item in the db with matching results for a given component,
+					// so we can break the loop and stop searching.
 					break
 				}
 			}
@@ -232,6 +263,9 @@ func getVersionAndNameFromComponentID(componentID string) (string, string) {
 	return name, version
 }
 
+// Get all the licenses for a given version
+// The db associates each license with a version (and not merely a component) in the same struct,
+// but XRay expects to receive license information in the form of a []string.
 func getLicensesForVersion(version string, licenses []License) ([]string, error) {
 	var matchingLicences []string
 	for _, license := range licenses {
@@ -240,12 +274,15 @@ func getLicensesForVersion(version string, licenses []License) ([]string, error)
 			return matchingLicences, err
 		}
 		if isMatching {
+			// Only pick the licenses for the specified version of the component
 			matchingLicences = append(matchingLicences, license.Licenses...)
 		}
 	}
 	return matchingLicences, nil
 }
 
+// Get all the vulnerabilities for a given version
+// The db associates each vulnerability with a version (and not merely a component) in the same struct,
 func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerability) ([]Vulnerability, error) {
 	var matchingVulnerabilities []Vulnerability
 	for _, vulnerability := range vulnerabilities {
@@ -254,6 +291,7 @@ func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerabilit
 			return matchingVulnerabilities, err
 		}
 		if isMatching {
+			// Only pick the vulnerabilities for the specified version of the component
 			matchingVulnerabilities = append(matchingVulnerabilities, vulnerability)
 		}
 	}
@@ -262,6 +300,8 @@ func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerabilit
 
 // Only semver is supported
 func isVersionMatching(componentVersion string, versionRange string) (bool, error) {
+	// This semver library helps us check whether a version
+	// is within a given range without doing any manual string parsing.
 	constraint, err := semver.NewConstraint(versionRange)
 	if err != nil {
 		log.Println(err)
