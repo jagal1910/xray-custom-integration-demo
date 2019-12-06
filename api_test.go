@@ -52,8 +52,10 @@ func TestApi(t *testing.T) {
 	})
 }
 
+// Valid api keys
+// should be accepted by the api
 func validAPIKeyTestComponentInfo(t *testing.T, ts *httptest.Server) {
-	req, err := http.NewRequest("GET", ts.URL+"/api/checkauth", nil)
+	req, err := http.NewRequest("GET", ts.URL+"/api/componentinfo", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,13 +64,15 @@ func validAPIKeyTestComponentInfo(t *testing.T, ts *httptest.Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusUnauthorized {
 		t.Error("Failed to validate api key: ", apiKey)
 	}
 }
 
+// Invalid api keys
+// should be rejected by the api with a 401 response
 func invalidAPIKeyTestComponentInfo(t *testing.T, ts *httptest.Server) {
-	req, err := http.NewRequest("GET", ts.URL+"/api/checkauth", nil)
+	req, err := http.NewRequest("GET", ts.URL+"/api/componentinfo", nil)
 	invalidKey := "invalidAPIKey"
 	if err != nil {
 		t.Fatal(err)
@@ -78,11 +82,13 @@ func invalidAPIKeyTestComponentInfo(t *testing.T, ts *httptest.Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusUnauthorized {
 		t.Error("Invalid API key was accepted: ", invalidKey)
 	}
 }
 
+// Querying a component with matching vulnerabilities in the database
+// should result in a response containing data about the vulnerabilities
 func vulnerableComponentTest(t *testing.T, ts *httptest.Server) {
 	component := ComponentInfoRequest{
 		Components: []Component{{
@@ -125,6 +131,8 @@ func vulnerableComponentTest(t *testing.T, ts *httptest.Server) {
 	}
 }
 
+// Querying a component in the database without vulnerabilities
+// should result in a response with empty vulnerability data
 func healthyComponentTest(t *testing.T, ts *httptest.Server) {
 	component := ComponentInfoRequest{
 		Components: []Component{{
@@ -168,6 +176,8 @@ func healthyComponentTest(t *testing.T, ts *httptest.Server) {
 	}
 }
 
+// Querying a component not in the database
+// should result in a 200 status code response with empty component data
 func notFoundComponentTest(t *testing.T, ts *httptest.Server) {
 	component := ComponentInfoRequest{
 		Components: []Component{{
@@ -208,6 +218,8 @@ func notFoundComponentTest(t *testing.T, ts *httptest.Server) {
 	}
 }
 
+// Querying a component that has non-matching versions in the database
+// should result in a 200 status code response with empty component data
 func notFoundVersionTest(t *testing.T, ts *httptest.Server) {
 	component := ComponentInfoRequest{
 		Components: []Component{{
@@ -248,8 +260,8 @@ func notFoundVersionTest(t *testing.T, ts *httptest.Server) {
 	}
 }
 
-// Tests that a request for info about component with vulnerabilities
-// in one version returns the proper response for a different healthy version
+// Querying a healthy version of a component that has a different version with vulnerabilities
+// should result in a response with empty vulnerability data
 func healthyVersionTest(t *testing.T, ts *httptest.Server) {
 	component := ComponentInfoRequest{
 		Components: []Component{{ComponentID: "pypi://requests:3.0.0"}},
@@ -295,6 +307,8 @@ func healthyVersionTest(t *testing.T, ts *httptest.Server) {
 
 }
 
+// Querying multiple vulnerable components
+// should result in a response with vulnerability data about each component
 func vulnerableComponentsTest(t *testing.T, ts *httptest.Server) {
 	component := ComponentInfoRequest{
 		Components: []Component{
@@ -338,6 +352,8 @@ func vulnerableComponentsTest(t *testing.T, ts *httptest.Server) {
 	}
 }
 
+// Valid api keys
+// should result in a 200 status response with the expected {Valid: true} json body
 func validAPIKeyTest(t *testing.T, ts *httptest.Server) {
 	req, err := http.NewRequest("GET", ts.URL+"/api/checkauth", nil)
 	if err != nil {
@@ -363,6 +379,8 @@ func validAPIKeyTest(t *testing.T, ts *httptest.Server) {
 	}
 }
 
+// Invalid api keys
+// should result in a 200 status response with the expected {Valid: false, Error: "Invalid Api Key"} json body.
 func invalidAPIKeyTest(t *testing.T, ts *httptest.Server) {
 	req, err := http.NewRequest("GET", ts.URL+"/api/checkauth", nil)
 	if err != nil {

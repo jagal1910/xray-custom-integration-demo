@@ -132,6 +132,7 @@ func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 // This endpoint provides information to XRay about components
 func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey string) {
 	key := r.Header.Get("apiKey")
+	fmt.Println(apiKey, key)
 	if key != apiKey {
 		http.Error(w, InvalidAPIKeyMessage, http.StatusUnauthorized)
 		return
