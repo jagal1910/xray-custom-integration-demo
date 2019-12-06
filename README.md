@@ -6,7 +6,6 @@ XRay Custom Integration Demo
 XRay can integrate with external services that provide information about vulnerabilities in packages. If a user wants to implement their own such service they can use a custom integration.
 
 
-
 ## Creating a custom Integration
 
 There are three pieces to set up:
@@ -14,6 +13,28 @@ There are three pieces to set up:
 - Artifactory
 - Your custom integration server
 - XRay
+
+### Files in this project
+
+**[main.go](./main.go)**
+
+This file contains the application code. It's an http server using golang's built-in `net/http`. It sets up the server, and implements two endpoints. It also contains the code that handles the data lookup needed by the `/api/componentinfo` endpoint.
+
+**[db.json](./db.json)**
+
+A json file used as a database. Its entries contain data about software components, their licenses and vulnerabilities.
+
+If no database path argument is provided to `go run main.go`, db.json will be used.
+
+This file is also used as the database for the included tests. Removing the file or altering existing entries in the database will cause tests to fail. Adding entries should not cause tests to fail.
+
+**[api_test.go](./api_test.go)**
+
+Contians tests for the integration server. The tests spin up a built-in `net/http/httptest` server. Test cases make calls to the test server's endpoints and validate responses.
+
+**[go.mod](./go.mod)**
+
+This project uses [Go Modules](https://blog.golang.org/using-go-modules) to manage dependencies. This file defines dependencies.
 
 ### Artifactory Setup
 
@@ -28,6 +49,8 @@ Update the settings for a repository in Artifactory to be viewable by XRay.
 If a path to db file is not specified, [db.json](./db.json) will be used. Take note of the api key for the next step.
 
 ### Using ngrok to expose your server to the internet
+
+***Disclaimer:*** *This use of ngrok is only for the purposes of testing this integration, and is not suitable for production.*
 
 The demo server runs on port 8080, so that's the port to expose.
 
