@@ -96,7 +96,9 @@ On the details page of the component you want to test, copy the **component id**
 
 At the bottom of [db.json](./db.json), create a new database entry with a fake vulnerability for your package.
 
-In the `component_id` field, **do not include the version**. Semver ranges are supported by the demo server.
+In the `component_id` field, **do not include the version**.
+ 
+Semver ranges are supported by the demo server.
 
 ```
   {
@@ -129,7 +131,7 @@ In the `component_id` field, **do not include the version**. Semver ranges are s
 
 ```
 
-For a component with and id of `pypi://requests:2.22.0`, the entry might look like this:
+For a component with an id of `pypi://requests:2.22.0`, the entry might look like this:
 
 Note that this example uses a semver range for its licence version
 ```
