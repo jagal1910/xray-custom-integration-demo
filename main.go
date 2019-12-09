@@ -208,7 +208,7 @@ func getDB(dbPath string) ([]ComponentRecord, error) {
 // Search db for matching components and return
 func findComponents(components []Component, db []ComponentRecord) (ComponentInfoResponse, error) {
 	matches := ComponentInfoResponse{}
-	// Check database for matching components
+	// Check database for licenses and vulnerabilities matching the versions
 	for _, component := range components {
 		result := ComponentInfo{}
 		name, version := getVersionAndNameFromComponentID(component.ComponentID)
@@ -226,7 +226,8 @@ func findComponents(components []Component, db []ComponentRecord) (ComponentInfo
 				if err != nil {
 					return matches, err
 				}
-				//
+				// If either a vulnerability or a license exists for the component,
+				// add it to the list of components used in the componentInfo response
 				if len(licenses) > 0 || len(vulnerabilities) > 0 {
 					result = ComponentInfo{
 						// Use the component_id provided by the client, NOT the one from our database.
@@ -240,7 +241,7 @@ func findComponents(components []Component, db []ComponentRecord) (ComponentInfo
 						Vulnerabilities: vulnerabilities,
 					}
 					matches.Components = append(matches.Components, result)
-					// There should be only one item in the db with matching results for a given component,
+					// There should be only one item in the db with matching results for a given component version,
 					// so we can break the loop and stop searching.
 					break
 				}
@@ -250,7 +251,7 @@ func findComponents(components []Component, db []ComponentRecord) (ComponentInfo
 	return matches, nil
 }
 
-// Extract the version from the last ":" in the component ID
+// Extract the version from the after the last ":" in the component ID
 func getVersionAndNameFromComponentID(componentID string) (string, string) {
 	index := strings.LastIndex(componentID, ":")
 	name := ""
@@ -282,7 +283,7 @@ func getLicensesForVersion(version string, licenses []License) ([]string, error)
 }
 
 // Get all the vulnerabilities for a given version
-// The db associates each vulnerability with a version (and not merely a component) in the same struct,
+// The db associates each vulnerability with a version (and not merely a component) in the same struct
 func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerability) ([]Vulnerability, error) {
 	var matchingVulnerabilities []Vulnerability
 	for _, vulnerability := range vulnerabilities {
@@ -300,8 +301,8 @@ func getVulnerabilitiesForVersion(version string, vulnerabilities []Vulnerabilit
 
 // Only semver is supported
 func isVersionMatching(componentVersion string, versionRange string) (bool, error) {
-	// This semver library helps us check whether a version
-	// is within a given range without doing any manual string parsing.
+	// Use this semver library to check whether a version
+	// is within a given range.
 	constraint, err := semver.NewConstraint(versionRange)
 	if err != nil {
 		log.Println(err)
