@@ -232,8 +232,8 @@ func findComponents(components []Component, db []ComponentRecord) (ComponentInfo
 						// Use the component_id provided by the client, NOT the one from our database.
 						// The db's notion of a component_id does not include the component's version.
 						// XRay needs us to include the version in this field.
-						ComponentID:     component.ComponentID,
-						Licenses:        licenses,
+						ComponentID: component.ComponentID,
+						Licenses:    licenses,
 						// Hardcode the provider name
 						// We want this to match the one configured in the XRay integration
 						Provider:        providerName,

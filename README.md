@@ -1,16 +1,30 @@
 XRay Custom Integration Demo
 =====
 
-## What is a custom integration?
+## What is a Custom Integration?
 
-XRay can integrate with external services that provide information about vulnerabilities in packages. If a user wants to implement their own such service they can use a custom integration.
+By default Xray looks for vulnerabilities and licenses in its vulnerabilities database.
+
+In the case that you would like to enrich this data based on your internal sources you can use the Customer Integration option.
+
+It allows you to add your own vulnerabilities and licenses to a component that is being scanned by Xray.
 
 
-## Creating a custom Integration
+
+#### **How does it work?**
+
+Each time Xray scans a component, it will also call the integration to check if the integration has any additional vulnerability or license information about the component.
+
+If the integration provides such data, Xray will add these additional vulnerabilities and licenses to the data of the component in Xray, and will apply the Security and License policies based on these additions.
+
+
+
+This project contains an example of such a custom integration that you can use to learn what is expected from such an integration.Creating a custom Integration
+
+### Creating a custom Integration
 
 There are three pieces to set up:
 
-- Artifactory
 - Your custom integration server
 - XRay
 
@@ -24,7 +38,7 @@ This file contains the application code. It's an http server using golang's buil
 
 A json file used as a database. Its entries contain data about software components, their licenses and vulnerabilities.
 
-If no database path argument is provided to `go run main.go`, db.json will be used.
+If no database path argument is provided to go run main.go, the path `./db.json` will be used. If run from the root directory of the project, this will cause the included demo database to be used.
 
 This file is also used as the database for the included tests. Removing the file or altering existing entries in the database will cause tests to fail. Adding entries should not cause tests to fail.
 
@@ -36,17 +50,13 @@ Contians tests for the integration server. The tests spin up a built-in `net/htt
 
 This project uses [Go Modules](https://blog.golang.org/using-go-modules) to manage dependencies. This file defines dependencies.
 
-### Artifactory Setup
-
-Update the settings for a repository in Artifactory to be viewable by XRay.
-
-![rt-xray-integration-checkbox.png](./images/rt-xray-integration-checkbox.png)
-
 ### Running the included demo server
+
+From the root of the project, run:
 
 `go run main.go (<api-key>) [<path-to-db-file>]`
 
-If a path to db file is not specified, [db.json](./db.json) will be used. Take note of the api key for the next step.
+If a path to db file is not specified, [db.json](./db.json) will be used. Take note of the api key for the next step. The value should be a string.
 
 ### Using ngrok to expose your server to the internet
 
@@ -77,10 +87,9 @@ Select custom integration.
 Configure the integration.
 
 - The base url will be unique to you (e.g. `https://eq8341dc.ngrok.io`).
-
 - Use `/api/componentinfo` and `/api/checkauth` as the endpoint names.
-
 -  Use `custom-integration-demo` as the Vendor.
+-  The “Enabled” checkbox should be checked.
 
 ![integration-config](./images/integration-config.png)
 
@@ -94,10 +103,10 @@ On the details page of the component you want to test, copy the **component id**
 
 [Depending on the package type](https://www.jfrog.com/confluence/display/XRAY/Xray+REST+API#XrayRESTAPI-ComponentIdentifiers), the component's id should look something like `pypi://requests:2.22.0`. 
 
-At the bottom of [db.json](./db.json), create a new database entry with a fake vulnerability for your package.
+At the bottom of [db.json](https://git.jfrog.info/projects/IOT/repos/xray-custom-integration-demo/browse/db.json), create a new database entry with a fake vulnerability for your package. The db is read at the time of each request, so if the server is already running there is no need to stop it during this test.
 
 In the `component_id` field, **do not include the version**.
- 
+
 Semver ranges are supported by the demo server.
 
 ```
@@ -183,12 +192,6 @@ Using a new component, make another db entry without any elements in the "vulner
 ```
 
 Trigger a scan for violations. No new security violations should appear in the UI. A new license should appear in the licenses tab after the first time the scan runs.
-
-### Watching for vulnerabilities
-
-In XRay, it is possible to create **policies** about vulnerabilities that can impose restrictions on an artifact (e.g. blocking the download of an artifact with a sufficiently severe security vulnerability). XRay **watches** can watch repositories for violation of policies and changes to licenses.
-
-To try this out with the demo, [create a watch and a policy](https://www.jfrog.com/confluence/display/XRAY/Watches) and add a new package to one of the repos being watched. If you add a package that matches one of the vulnerabilities in the database, the watch should trigger the creation of a new vulnerability listing for that component.
 
 ### Running Tests
 
