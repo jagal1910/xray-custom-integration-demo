@@ -1,8 +1,6 @@
 XRay Custom Integration Demo
 =====
 
-This guide is for users already familiar with the features of XRay and Artifactory. For a more detailed version of the same guide, see [DETAILED.md](./DETAILED.md).
-
 ## What is a Custom Integration?
 
 By default Xray looks for vulnerabilities and licenses in its vulnerabilities database.
@@ -27,6 +25,7 @@ This project contains an example of such a custom integration that you can use t
 
 There are three pieces to set up:
 
+- Artifactory
 - Your custom integration server
 - XRay
 
@@ -51,6 +50,12 @@ Contians tests for the integration server. The tests spin up a built-in `net/htt
 **[go.mod](./go.mod)**
 
 This project uses [Go Modules](https://blog.golang.org/using-go-modules) to manage dependencies. This file defines dependencies.
+
+### Artifactory Setup
+
+Update the settings for a repository in Artifactory to be viewable by XRay.
+
+![rt-xray-integration-checkbox.png](./images/rt-xray-integration-checkbox.png)
 
 ### Running the included demo server
 
@@ -194,6 +199,12 @@ Using a new component, make another db entry without any elements in the "vulner
 ```
 
 Trigger a scan for violations. No new security violations should appear in the UI. A new license should appear in the licenses tab after the first time the scan runs.
+
+### Watching for vulnerabilities
+
+In XRay, it is possible to create **policies** about vulnerabilities that can impose restrictions on an artifact (e.g. blocking the download of an artifact with a sufficiently severe security vulnerability). XRay **watches** can watch repositories for violation of policies and changes to licenses.
+
+To try this out with the demo, [create a watch and a policy](https://www.jfrog.com/confluence/display/XRAY/Watches) and add a new package to one of the repos being watched. If you add a package that matches one of the vulnerabilities in the database, the watch should trigger the creation of a new vulnerability listing for that component.
 
 ### Running Tests
 
