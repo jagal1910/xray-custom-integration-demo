@@ -7,7 +7,7 @@ This guide is for users already familiar with the features of XRay and Artifacto
 
 By default Xray looks for vulnerabilities and licenses in its vulnerabilities database.
 
-In the case that you would like to enrich this data based on your internal sources you can use the Customer Integration option.
+In the case that you would like to enrich this data based on your internal sources you can use the Custom Integration option.
 
 It allows you to add your own vulnerabilities and licenses to a component that is being scanned by Xray.
 
