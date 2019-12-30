@@ -21,7 +21,7 @@ If the integration provides such data, Xray will add these additional vulnerabil
 
 
 
-This project contains an example of such a custom integration that you can use to learn what is expected from such an integration.Creating a custom Integration
+This project contains an example of such a custom integration that you can use to learn what is expected from such an integration.
 
 ### Creating a custom Integration
 
