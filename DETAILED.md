@@ -53,6 +53,14 @@ This project uses [Go Modules](https://blog.golang.org/using-go-modules) to mana
 
 ### Artifactory Setup
 
+Navigate to repository settings in the Admin panel by selecting the type of the repository you want to expose to XRay.
+
+![rt-admin-settings.png](./images/rt-admin-settings.png)
+
+
+
+Find your repository in the list and click on it to open settings.
+
 Update the settings for a repository in Artifactory to be viewable by XRay.
 
 ![rt-xray-integration-checkbox.png](./images/rt-xray-integration-checkbox.png)
