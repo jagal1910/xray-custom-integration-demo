@@ -25,7 +25,7 @@ This project contains an example of such a custom integration that you can use t
 
 ### Creating a custom Integration
 
-There are three pieces to set up:
+There are two pieces to set up:
 
 - Your custom integration server
 - XRay
