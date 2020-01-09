@@ -51,6 +51,12 @@ Contains tests for the integration server. The tests spin up a built-in `net/htt
 
 This project uses [Go Modules](https://blog.golang.org/using-go-modules) to manage dependencies. This file defines dependencies.
 
+### Go Version
+
+Ensure you have a golang version that can use Go Modules. The minimum version is `go1.11`.
+
+`go version`
+
 ### Artifactory Setup
 
 Navigate to repository settings in the Admin panel by selecting the type of the repository you want to expose to XRay.
@@ -101,6 +107,14 @@ Select custom integration.
 
 Configure the integration.
 
+| Field                       | Value                         | Description                                                                       |
+|-----------------------------|-------------------------------|-----------------------------------------------------------------------------------|
+| API Token                   | <your api key>                | The secret used key for auth with your integration server                         |
+| URL                         | <your base url>/componentinfo | The url of the endpoint that responds with information about software components. |
+| Test URL                    | <your base url>/checkauth     | The url of the endpoint that XRay uses to check whether its secret key is valid.  |
+| Integration Icon (Optional) | Not used in this demo         | A url of the integration's icon image.                                            |
+| Description                 | <any string>                  | A short text description of the integration.                                      |
+
 - The base url will be unique to you (e.g. `https://eq8341dc.ngrok.io`).
 - Use `/api/componentinfo` and `/api/checkauth` as the endpoint names.
 - Use `custom-integration-demo` as the Vendor.
@@ -109,6 +123,8 @@ Configure the integration.
 ![integration-config](./images/integration-config.png)
 
 Test the connection and api key by clicking the **"Test"** button pictured above. You should get a message saying "API key is valid" in the XRay UI. If you don't get this message your integration is not working.
+
+If the test is successful, click the "Save" button to create the integration.
 
 ### Generating a Security Vulnerability
 
@@ -122,6 +138,10 @@ At the bottom of [db.json](https://git.jfrog.info/projects/IOT/repos/xray-custom
 
 In the `component_id` field, **do not include the version**.
 
+Be sure to include the version in both the `version` and `licenses` of the data.
+
+Be sure to **not** include the version in the `component_id` field.
+
 Semver ranges are supported by the demo server.
 
 ```
@@ -129,7 +149,7 @@ Semver ranges are supported by the demo server.
     "component_id": <component-id-without-version>,
     "licenses": [
       {
-        "version": <component-version>,
+        "version": <component-version>, // Don't forget to include the version here
         "licenses": [
           "Apache 2.0"
         ]
@@ -138,8 +158,7 @@ Semver ranges are supported by the demo server.
     "vulnerabilities": [
       {
         "cve": "CVE-0000-0000",
-        "version": <component-version>,
-        "type": "security",
+        "version": <component-version>, // Don't forget to include the version here
         "source_id": "0",
         "summary": "A fake vulnerability with my component",
         "description": "A description of the fake vulnerability",
@@ -194,7 +213,7 @@ Using a new component, make another db entry without any elements in the "vulner
     "component_id": <component-id-without-version>,
     "licenses": [
       {
-        "version": <component-version>,
+        "version": <component-version>, // Don't forget to include the version here
         "licenses": [
           "Apache 2.0"
         ]
