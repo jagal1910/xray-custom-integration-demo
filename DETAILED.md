@@ -45,7 +45,7 @@ This file is also used as the database for the included tests. Removing the file
 
 **[api_test.go](./api_test.go)**
 
-Contians tests for the integration server. The tests spin up a built-in `net/http/httptest` server. Test cases make calls to the test server's endpoints and validate responses.
+Contains tests for the integration server. The tests spin up a built-in `net/http/httptest` server. Test cases make calls to the test server's endpoints and validate responses.
 
 **[go.mod](./go.mod)**
 
@@ -103,8 +103,8 @@ Configure the integration.
 
 - The base url will be unique to you (e.g. `https://eq8341dc.ngrok.io`).
 - Use `/api/componentinfo` and `/api/checkauth` as the endpoint names.
--  Use `custom-integration-demo` as the Vendor.
--  The “Enabled” checkbox should be checked.
+- Use `custom-integration-demo` as the Vendor.
+- The “Enabled” checkbox should be checked.
 
 ![integration-config](./images/integration-config.png)
 
