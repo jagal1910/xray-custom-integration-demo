@@ -142,7 +142,8 @@ Be sure to include the version in both the `version` and `licenses` of the data.
 
 Be sure to **not** include the version in the `component_id` field.
 
-Semver ranges are supported by the demo server.
+Note: *Only Semver ranges and versions are supported by the demo server. 
+This is a limitation of this particular demo. A production Custom Integration should account for this case.*
 
 ```
   {
