@@ -93,26 +93,23 @@ Once ngrok is running, take note of the forwarding urls. These will be provided 
 
 ### XRay Setup
 
-Open the integrations view from the admin panel in the sidebar.
+From the Administration panel, navigate to Xray settings and then click on Integrations.
+In the Integrations go to Vulnerability Feeds.
 
 ![xray-integrations-menu-item](./images/xray-integrations-menu-item.png)
 
-Click the + icon to add an integration.
+Click the + New Integration icon to add an integration.
 
 ![./images/add-integration-button](./images/add-integration-button.png)
-
-Select custom integration.
-
-![integration-type](./images/integration-type.png)
 
 Configure the integration.
 
 | Field                       | Value                         | Description                                                                       |
 |-----------------------------|-------------------------------|-----------------------------------------------------------------------------------|
-| API Token                   | <your api key>                | The secret used key for auth with your integration server                         |
+| Vendor                      |                               | The name that you wish to give to the specific integration.  
+| API Token                   | <your api key>                | The secret used key for auth with your integration server.                         |
 | URL                         | <your base url>/componentinfo | The url of the endpoint that responds with information about software components. |
 | Test URL                    | <your base url>/checkauth     | The url of the endpoint that XRay uses to check whether its secret key is valid.  |
-| Integration Icon (Optional) | Not used in this demo         | A url of the integration's icon image.                                            |
 | Description                 | <any string>                  | A short text description of the integration.                                      |
 
 - The base url will be unique to you (e.g. `https://eq8341dc.ngrok.io`).
@@ -122,9 +119,9 @@ Configure the integration.
 
 ![integration-config](./images/integration-config.png)
 
-Test the connection and api key by clicking the **"Test"** button pictured above. You should get a message saying "API key is valid" in the XRay UI. If you don't get this message your integration is not working.
+Test the connection and api key by clicking the **"Test"** button pictured above. You should be able to see a new entry in the ngrok terminal. No indication in Xray UI.
 
-If the test is successful, click the "Save" button to create the integration.
+If the test is successful, click the "Create" button to create the integration.
 
 ### Generating a Security Vulnerability
 
@@ -164,6 +161,8 @@ This is a limitation of this particular demo. A production Custom Integration sh
         "summary": "A fake vulnerability with my component",
         "description": "A description of the fake vulnerability",
         "cvss_v2": "7.9",
+        "cvss_v3": "7.9",
+        "severity": "high",
         "url": "http://more.info",
         "publish_date": "2019-11-03T07:30:51.991+00:00",
         "references": [

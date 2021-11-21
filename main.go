@@ -41,6 +41,8 @@ type Vulnerability struct {
 	Summary     string
 	Description string
 	CVSSV2      string `json:"cvss_v2"`
+	CVSSV3      string `json:"cvss_v3"`
+	SEVERITY    string `json:"severity"`
 	URL         string
 	PublishDate string `json:"publish_date"`
 	References  []string
@@ -138,7 +140,10 @@ func checkAuth(w http.ResponseWriter, r *http.Request, apiKey string) {
 
 	w.Header().Set("Content-Type", "application/json")
 	// Write a 200 response, even when the client is not authorized.
-	w.Write(js)
+	_, err = w.Write(js)
+	if err != nil {
+		return
+	}
 }
 
 /**
@@ -191,7 +196,10 @@ func componentInfo(w http.ResponseWriter, r *http.Request, dbPath string, apiKey
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	_, err = w.Write(js)
+	if err != nil {
+		return
+	}
 }
 
 // Unmarshall data from the json db
