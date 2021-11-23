@@ -40,9 +40,9 @@ type Vulnerability struct {
 	SourceID    string `json:"source_id"`
 	Summary     string
 	Description string
-	CVSSV2      string `json:"cvss_v2"`
-	CVSSV3      string `json:"cvss_v3"`
-	SEVERITY    string `json:"severity"`
+	Cvssv2      string `json:"cvss_v2"`
+	Cvssv3      string `json:"cvss_v3"`
+	Severity    string `json:"severity"`
 	URL         string
 	PublishDate string `json:"publish_date"`
 	References  []string
