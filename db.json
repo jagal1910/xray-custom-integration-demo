@@ -81,21 +81,68 @@
       {
         "version": "16.13.1",
         "licenses": [
-          "Apache 2.0"
+          "Apache 2.0",
+          "BSD",
+          "AAL"
         ]
       }
     ],
     "vulnerabilities": [
       {
-        "cve": "CVE-0000-0000",
+        "cve": "CVE-0000-10000",
         "version": "16.13.1",
         "type": "security",
-        "source_id": "12",
-        "summary": "A fake vulnerability",
+        "source_id": "200",
+        "summary": "An originalfake vulnerability",
         "description": "A description of the fake vulnerability",
         "cvss_v2": "7.9",
-        "cvss_v3": "9.2",
+        "cvss_v3": "9.1",
         "severity": "critical",
+        "url": "http://more.info",
+        "publish_date": "2021-11-04T07:30:51.991+00:00",
+        "references": [
+          "http://jfrog.com"
+        ]
+      },
+      {
+        "cve": "CVE-0000-20000",
+        "version": "16.13.1",
+        "type": "security",
+        "source_id": "201",
+        "summary": "An originalfake vulnerability",
+        "description": "A description of the fake vulnerability",
+        "cvss_v2": "7.9",
+        "cvss_v3": "9.1",
+        "severity": "low",
+        "url": "http://more.info",
+        "publish_date": "2021-11-04T07:30:51.991+00:00",
+        "references": [
+          "http://jfrog.com"
+        ]
+      },
+      {
+        "cve": "CVE-0000-30000",
+        "version": "16.13.1",
+        "type": "security",
+        "source_id": "202",
+        "summary": "An originalfake vulnerability",
+        "description": "A description of the fake vulnerability",
+        "cvss_v2": "7.9",
+        "severity": "medium",
+        "url": "http://more.info",
+        "publish_date": "2021-11-04T07:30:51.991+00:00",
+        "references": [
+          "http://jfrog.com"
+        ]
+      },
+      {
+        "cve": "CVE-0000-40000",
+        "version": "16.13.1",
+        "type": "security",
+        "source_id": "203",
+        "summary": "An originalfake vulnerability",
+        "description": "A description of the fake vulnerability",
+        "cvss_v3": "5.0",
         "url": "http://more.info",
         "publish_date": "2021-11-04T07:30:51.991+00:00",
         "references": [
